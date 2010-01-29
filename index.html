@@ -11,11 +11,20 @@
         <script src="jquery.colorpicker.js" type="text/javascript" charset="utf-8"></script>
         <script type="text/javascript" charset="utf-8">
             $(document).ready(function(){
+                
+                // instantiate
                 picker = new jQuery.ColorPicker('#colorpicker', {
-                    imagepath: ''
+                    imagepath: '',
+                    change: function(hex) {
+                        $('h1').css('color', hex);
+                        $('#hex_input').val(hex);
+                    }
                 });
-                picker.change(function(hex) {
-                    $('h1').css('color', hex);
+                
+                // link text input back to picker
+                $('#hex_input').keyup(function(){
+                    var hex = $(this).val();
+                    picker.hex(hex);
                 });
             });
         </script>
@@ -26,6 +35,10 @@
         <div id="colorpicker">
             replaced content
         </div>
+        
+        <fieldset>
+            <label>Hexadecimal</label> <input type="text" id="hex_input" /> 
+        </fieldset>
         
         <p>Project hosted at <a href="http://github.com/rennat/jQuery-ColorPicker/">github</a>.</p>
         <p><a href="http://github.com/rennat/jQuery-ColorPicker/">http://github.com/rennat/jQuery-ColorPicker/</a></p>

@@ -1,78 +1,88 @@
-function hsvToRgb(h, s, v) {
-	var r, g, b;
-	var i;
-	var f, p, q, t;
-	
-	// Make sure our arguments stay in-range
-	h = Math.max(0, Math.min(360, h));
-	s = Math.max(0, Math.min(100, s));
-	v = Math.max(0, Math.min(100, v));
-	
-	// We accept saturation and value arguments from 0 to 100 because that's
-	// how Photoshop represents those values. Internally, however, the
-	// saturation and value are calculated from a range of 0 to 1. We make
-	// That conversion here.
-	s /= 100;
-	v /= 100;
-	
-	if(s == 0) {
-		// Achromatic (grey)
-		r = g = b = v;
-		return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
-	}
-	
-	h /= 60; // sector 0 to 5
-	i = Math.floor(h);
-	f = h - i; // factorial part of h
-	p = v * (1 - s);
-	q = v * (1 - s * f);
-	t = v * (1 - s * (1 - f));
+function rgbToHsv(r, g, b){
+    r = r/255, g = g/255, b = b/255;
+    var max = Math.max(r, g, b), min = Math.min(r, g, b);
+    var h, s, v = max;
 
-	switch(i) {
-		case 0:
-			r = v;
-			g = t;
-			b = p;
-			break;
-			
-		case 1:
-			r = q;
-			g = v;
-			b = p;
-			break;
-			
-		case 2:
-			r = p;
-			g = v;
-			b = t;
-			break;
-			
-		case 3:
-			r = p;
-			g = q;
-			b = v;
-			break;
-			
-		case 4:
-			r = t;
-			g = p;
-			b = v;
-			break;
-			
-		default: // case 5:
-			r = v;
-			g = p;
-			b = q;
-	}
-	
-	return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
-};
+    var d = max - min;
+    s = max == 0 ? 0 : d / max;
+
+    if(max == min){
+        h = 0; // achromatic
+    }else{
+        switch(max){
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+
+    return [Math.round(h * 360), s, v];
+}
+
+function hsvToRgb(h, s, v){
+    var r, g, b;
+    var i;
+    var f, p, q, t;
+    
+    while (h < 0) { h += 360; };
+    while (h > 360) { h -= 360; };
+    s = Math.max(0, Math.min(1, s));
+    v = Math.max(0, Math.min(1, v));
+ 
+    if(s == 0) {
+        r = g = b = v;
+        return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+    }
+ 
+    h /= 60;
+    i = Math.floor(h);
+    f = h - i;
+    p = v * (1 - s);
+    q = v * (1 - s * f);
+    t = v * (1 - s * (1 - f));
+ 
+    switch(i) {
+        case 0: r = v; g = t; b = p; break;
+        case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break;
+        case 3: r = p; g = q; b = v; break;
+        case 4: r = t; g = p; b = v; break;
+        default: r = v; g = p; b = q;
+    }
+ 
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
 
 function hsvToHex(h,s,v){
     var rgb = hsvToRgb(h,s,v);
-    var r = rgb[0].toString(16);
-    var g = rgb[1].toString(16);
-    var b = rgb[2].toString(16);
+    return rgbToHex(rgb[0], rgb[1], rgb[2]);
+};
+
+function hexToRgb(hex) {
+    if (hex.substring(0,1) == '#') { hex = hex.substring(1,hex.length); };
+    
+    var strPattern = /^([0-9a-f]{3}|[0-9a-f]{6})$/i; 
+    if(strPattern.test(hex) == true) {
+        if (hex.length == 3) {
+            var r = hex.substring(0,0);
+            var g = hex.substring(1,1);
+            var b = hex.substring(2,2);
+            hex = r + r + g + g + b + b;
+        };
+        var r = parseInt(hex.substring(0,2), 16);
+        var g = parseInt(hex.substring(2,4), 16);
+        var b = parseInt(hex.substring(4,6), 16);
+        return [r, g, b];
+    } else {
+        return false;
+    };
+};
+
+function rgbToHex(r,g,b) {
+    r = parseInt(r).toString(16);
+    g = parseInt(g).toString(16);
+    b = parseInt(b).toString(16);
     if (r.length < 2) { r = '0' + r; };
     if (g.length < 2) { g = '0' + g; };
     if (b.length < 2) { b = '0' + b; };
@@ -80,10 +90,6 @@ function hsvToHex(h,s,v){
 };
 
 jQuery.ColorPicker = function(container, options) {
-    settings = jQuery.extend({
-        imagepath: ''
-    }, options);
-    
     var picker = this;
     
     picker.build = function(){
@@ -107,7 +113,7 @@ jQuery.ColorPicker = function(container, options) {
                 'width': '272px',
                 'height': '272px;'
             }).appendTo(container);
-        var wheel_bg = picker.el.wheel_bg = jQuery('<div/>')
+        var wheel = picker.el.wheel = jQuery('<div/>')
             .css({
                 'position': 'absolute',
                 'z-index': '2',
@@ -115,9 +121,9 @@ jQuery.ColorPicker = function(container, options) {
                 'left': '0',
                 'width': '256px',
                 'height': '256px',
-                'background': 'url(' + settings.imagepath + 'jquery.colorpicker.wheel_bg.png)'
+                'background': 'url(' + picker.settings.imagepath + 'jquery.colorpicker.wheel.png)'
             }).appendTo(wheel_container);
-        var wheel = picker.el.wheel = jQuery('<div/>')
+        var wheel_mask = picker.el.wheel_mask = jQuery('<div/>')
             .css({
                 'position': 'absolute',
                 'z-index': '3',
@@ -125,7 +131,8 @@ jQuery.ColorPicker = function(container, options) {
                 'left': '0',
                 'width': '256px',
                 'height': '256px',
-                'background': 'url(' + settings.imagepath + 'jquery.colorpicker.wheel.png)'
+                'background': 'url(' + picker.settings.imagepath + 'jquery.colorpicker.wheel_mask.png)',
+                'opacity': 0
             }).appendTo(wheel_container);
         var wheel_cursor = picker.el.wheel_cursor = jQuery('<div/>')
             .css({
@@ -135,7 +142,7 @@ jQuery.ColorPicker = function(container, options) {
                 'left': '120px',
                 'width': '16px',
                 'height': '16px',
-                'background': 'url(' + settings.imagepath + 'jquery.colorpicker.wheel_cursor.png)'
+                'background': 'url(' + picker.settings.imagepath + 'jquery.colorpicker.wheel_cursor.png)'
             }).appendTo(wheel_container);
         var wheel_hit = picker.el.wheel_hit = jQuery('<div/>')
             .css({
@@ -175,7 +182,7 @@ jQuery.ColorPicker = function(container, options) {
                 'left': '0',
                 'width': '16px',
                 'height': '256px',
-                'background': 'url(' + settings.imagepath + 'jquery.colorpicker.slider.png)'
+                'background': 'url(' + picker.settings.imagepath + 'jquery.colorpicker.slider.png)'
             }).appendTo(slider_container);
         var slider_cursor = picker.el.slider_cursor = jQuery('<div/>')
             .css({
@@ -185,7 +192,7 @@ jQuery.ColorPicker = function(container, options) {
                 'left': '8px',
                 'width': '16px',
                 'height': '16px',
-                'background': 'url(' + settings.imagepath + 'jquery.colorpicker.slider_cursor.png)'
+                'background': 'url(' + picker.settings.imagepath + 'jquery.colorpicker.slider_cursor.png)'
             }).appendTo(slider_container);
         var slider_hit = picker.el.slider_hit = jQuery('<div/>')
             .css({
@@ -212,21 +219,8 @@ jQuery.ColorPicker = function(container, options) {
             if (picker.mouse.wheel) { picker.wheel_update(e); } else
             if (picker.mouse.slider) { picker.slider_update(e); };
         });
-    };
-    
-    picker.slider_update = function(e) {
-        var pxOffset = Math.max(0, Math.min(255, e.pageY - Math.round(picker.el.slider.offset().top)));
-        var val = Math.round(100 - (pxOffset * 0.390625));
-        picker.el.slider_cursor.css('top', pxOffset - 8 + 'px');
-        picker.color.val =  val;
-        picker.color.hex = '#' + hsvToHex(picker.color.hue, picker.color.sat, picker.color.val);
         
-        var fullVal = '#' + hsvToHex(picker.color.hue, picker.color.sat, 100);
-        picker.el.slider_bg.css('background', fullVal);
-        
-        picker.el.wheel.css('opacity', picker.color.val / 100);
-        
-        picker.fn.change(picker.color.hex);
+        return picker;
     };
     
     picker.wheel_update = function(e) {
@@ -235,41 +229,114 @@ jQuery.ColorPicker = function(container, options) {
         var d = Math.sqrt(Math.pow(x-picker.math.center.x,2) + Math.pow(y-picker.math.center.y,2));
         if (d <= picker.math.radius) {
             picker.el.wheel_cursor.css({'top': y-8+'px', 'left': x-8+'px'});
-            picker.color.hue = Math.round(Math.atan2((picker.math.center.y - y), (picker.math.center.x - x)) * 180/Math.PI) - 90;
-            if (picker.color.hue < 0) { picker.color.hue += 360; }
-            picker.color.sat = Math.round(d/128 * 100);
-        
-            picker.color.hex = hsvToHex(picker.color.hue, picker.color.sat, picker.color.val);
-    
-            var fullVal = hsvToHex(picker.color.hue, picker.color.sat, 100);
+            var angle = picker.math.angle = Math.atan2((picker.math.center.y - y), (picker.math.center.x - x));
+            var hue = picker.color.hue = Math.round(angle * 180/Math.PI) + 90;
+            if (hue < 0) { hue = picker.color.hue += 360; };
+            picker.color.sat = d/128;
+            
+            picker.color.hex = hsvToHex(hue, picker.color.sat, picker.color.val);
+            
+            var fullVal = hsvToHex(hue, picker.color.sat, 1);
             picker.el.slider_bg.css('background', '#' + fullVal);
+            
+            picker.update();
+        };
+        return picker;
+    };
+    
+    picker.slider_update = function(e) {
+        var pxOffset = Math.max(0, Math.min(255, e.pageY - Math.round(picker.el.slider.offset().top)));
+        var val = Math.round(100 - (pxOffset * 0.390625)) * 0.01;
+        picker.el.slider_cursor.css('top', pxOffset - 8 + 'px');
+        picker.color.val =  val;
+        picker.color.hex = hsvToHex(picker.color.hue, picker.color.sat, picker.color.val);
         
-            picker.fn.change('#' + picker.color.hex);
+        var fullVal = hsvToHex(picker.color.hue, picker.color.sat, 1);
+        picker.el.slider_bg.css('background', '#' + fullVal);
+        
+        picker.el.wheel_mask.css('opacity', 1 - picker.color.val);
+        
+        picker.update();
+
+        return picker;
+    };
+    
+    picker.hex_update = function(hex) {
+        if (hex.substring(0,1) == '#') { hex = hex.substring(1,hex.length); };
+        
+        var rgb = hexToRgb(hex);
+        var hsv = rgbToHsv(rgb[0], rgb[1], rgb[2]);
+        
+        picker.color.hex = hex;
+        picker.color.hue = hsv[0];
+        picker.color.sat = hsv[1];
+        picker.color.val = hsv[2];
+        
+        // update value
+        var fullVal = hsvToHex(picker.color.hue, picker.color.sat, 1);
+        picker.el.slider_bg.css('background', '#' + fullVal);
+        var top =  256 * (1 - picker.color.val) - 8;
+        picker.el.slider_cursor.css('top', top + 'px');
+        picker.el.wheel_mask.css('opacity', 1 - picker.color.val);
+        
+        // update hue / sat
+        var adeg = picker.color.hue + 90;
+        if (adeg < 0) { adeg += 360; };
+        var arad = adeg * Math.PI/180;
+        var x2 = picker.math.center.x + Math.round(picker.color.sat * picker.math.radius * Math.cos(arad));
+        var y2 = picker.math.center.y + Math.round(picker.color.sat * picker.math.radius * Math.sin(arad));
+        picker.el.wheel_cursor.css({
+            'top': y2 - 8 + 'px',
+            'left': x2 - 8 + 'px'
+        });
+        picker.update();
+    };
+    
+    picker.change = function() {
+        return picker.update();
+    };
+    
+    picker.update = function() {
+        picker.fn.change('#' + picker.color.hex);
+    };
+    
+    picker.hex = function(hex) {
+        var strPattern = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i; 
+        if (hex && strPattern.test(hex)) {
+            picker.hex_update(hex);
+            return picker;
+        } else {
+            return '#' + picker.color.hex;
         };
     };
     
-    picker.change = function(fn) {
-        picker.fn.change = fn;
-    };
-    
     picker.init = function(){
+        var container = arguments[0];
+        var options = (arguments[1]) ? arguments[1] : {};
+        
+        picker.settings = jQuery.extend({
+            imagepath: '',
+            change: function(hex){}
+        }, options);
+    
         picker.fn = {};
-        picker.fn.change = function(h){};
+        picker.fn.change = picker.settings.change;
         picker.el = {};
         picker.el.container = jQuery(container);
         picker.mouse = {};
         picker.mouse.wheel = false;
         picker.mouse.slider = false;
         picker.math = {};
+        picker.math.angle = 0;
         picker.math.center = {x: 128, y: 128};
         picker.math.radius = 128;
         picker.color = {};
         picker.color.hue = 0;
         picker.color.sat = 0;
-        picker.color.val = 100;
-        picker.color.hex = "#ffffff";
-        picker.build();
+        picker.color.val = 1;
+        picker.color.hex = "ffffff";
+        picker.build().update();
         return picker;
     };
-    return picker.init();
+    return picker.init(container, options);
 };
