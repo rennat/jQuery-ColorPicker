@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>jQuery colorpicker</title>
+        <script src="http://www.google.com/jsapi"></script>
+        <script type="text/javascript" charset="utf-8">
+            google.load("jquery", "1.4.1");
+            google.load("jqueryui", "1.7.2");
+        </script>
+        <script src="jquery.colorpicker.js" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript" charset="utf-8">
+            $(document).ready(function(){
+                picker = new jQuery.ColorPicker('#colorpicker');
+                picker.change(function(hex) {
+                    $('h1').css('color', hex);
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <h1>jQuery colorpicker</h1>
+        
+        <div id="colorpicker">
+            replace
+        </div>
+        
+    </body>
+</html>
