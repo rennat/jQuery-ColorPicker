@@ -88,8 +88,7 @@ jQuery.ColorPicker = function(container, options) {
                 'display': 'block',
                 'position': 'relative',
                 'width': '312px',
-                'height': '272px',
-                'background': '#404040'
+                'height': '272px'
             });
         
         // Wheel setup
@@ -196,45 +195,51 @@ jQuery.ColorPicker = function(container, options) {
         wheel_hit.mousedown(function(){ picker.mouse.wheel = true; });
         wheel_hit.mouseup(function(){ picker.mouse.wheel = false; });
         wheel_hit.mouseout(function(){ picker.mouse.wheel = false; });
+        wheel_hit.click(function(e){ picker.wheel_update(e); });
         
         slider_hit.mousedown(function(){ picker.mouse.slider = true; });
         slider_hit.mouseup(function(){ picker.mouse.slider = false; });
         slider_hit.mouseout(function(){ picker.mouse.slider = false; });
+        slider_hit.click(function(e){ picker.slider_update(e); });
         
         jQuery(window).mousemove(function(e){
-            if (picker.mouse.slider) {
-                var pxOffset = Math.max(0, Math.min(255, e.pageY - Math.round(slider.offset().top)));
-                var val = Math.round(100 - (pxOffset * 0.390625));
-                picker.el.slider_cursor.css('top', pxOffset - 8 + 'px');
-                picker.color.val =  val;
-                picker.color.hex = '#' + hsvToHex(picker.color.hue, picker.color.sat, picker.color.val);
-                
-                var fullVal = '#' + hsvToHex(picker.color.hue, picker.color.sat, 100);
-                picker.el.slider_bg.css('background', fullVal);
-                
-                picker.el.wheel.css('opacity', picker.color.val / 100);
-                
-                picker.fn.change(picker.color.hex);
-            } else
-            if (picker.mouse.wheel) {
-                var x = Math.max(0, Math.min(255, e.pageX - Math.round(wheel.offset().left)));
-                var y = Math.max(0, Math.min(255, e.pageY - Math.round(wheel.offset().top)));
-                var d = Math.sqrt(Math.pow(x-picker.math.center.x,2) + Math.pow(y-picker.math.center.y,2));
-                if (d <= picker.math.radius) {
-                    picker.el.wheel_cursor.css({'top': y-8+'px', 'left': x-8+'px'});
-                    picker.color.hue = Math.round(Math.atan2((picker.math.center.y - y), (picker.math.center.x - x)) * 180/Math.PI) - 90;
-                    if (picker.color.hue < 0) { picker.color.hue += 360; }
-                    picker.color.sat = Math.round(d/128 * 100);
-                    
-                    picker.color.hex = hsvToHex(picker.color.hue, picker.color.sat, picker.color.val);
-                
-                    var fullVal = hsvToHex(picker.color.hue, picker.color.sat, 100);
-                    picker.el.slider_bg.css('background', '#' + fullVal);
-                    
-                    picker.fn.change('#' + picker.color.hex);
-                };
-            };
+            if (picker.mouse.wheel) { picker.wheel_update(e); } else
+            if (picker.mouse.slider) { picker.slider_update(e); };
         });
+    };
+    
+    picker.slider_update = function(e) {
+        var pxOffset = Math.max(0, Math.min(255, e.pageY - Math.round(picker.el.slider.offset().top)));
+        var val = Math.round(100 - (pxOffset * 0.390625));
+        picker.el.slider_cursor.css('top', pxOffset - 8 + 'px');
+        picker.color.val =  val;
+        picker.color.hex = '#' + hsvToHex(picker.color.hue, picker.color.sat, picker.color.val);
+        
+        var fullVal = '#' + hsvToHex(picker.color.hue, picker.color.sat, 100);
+        picker.el.slider_bg.css('background', fullVal);
+        
+        picker.el.wheel.css('opacity', picker.color.val / 100);
+        
+        picker.fn.change(picker.color.hex);
+    };
+    
+    picker.wheel_update = function(e) {
+        var x = Math.max(0, Math.min(255, e.pageX - Math.round(picker.el.wheel.offset().left)));
+        var y = Math.max(0, Math.min(255, e.pageY - Math.round(picker.el.wheel.offset().top)));
+        var d = Math.sqrt(Math.pow(x-picker.math.center.x,2) + Math.pow(y-picker.math.center.y,2));
+        if (d <= picker.math.radius) {
+            picker.el.wheel_cursor.css({'top': y-8+'px', 'left': x-8+'px'});
+            picker.color.hue = Math.round(Math.atan2((picker.math.center.y - y), (picker.math.center.x - x)) * 180/Math.PI) - 90;
+            if (picker.color.hue < 0) { picker.color.hue += 360; }
+            picker.color.sat = Math.round(d/128 * 100);
+        
+            picker.color.hex = hsvToHex(picker.color.hue, picker.color.sat, picker.color.val);
+    
+            var fullVal = hsvToHex(picker.color.hue, picker.color.sat, 100);
+            picker.el.slider_bg.css('background', '#' + fullVal);
+        
+            picker.fn.change('#' + picker.color.hex);
+        };
     };
     
     picker.change = function(fn) {
