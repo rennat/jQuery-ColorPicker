@@ -7,12 +7,13 @@
         <script src="http://www.google.com/jsapi"></script>
         <script type="text/javascript" charset="utf-8">
             google.load("jquery", "1.4.1");
-            google.load("jqueryui", "1.7.2");
         </script>
         <script src="jquery.colorpicker.js" type="text/javascript" charset="utf-8"></script>
         <script type="text/javascript" charset="utf-8">
             $(document).ready(function(){
-                picker = new jQuery.ColorPicker('#colorpicker');
+                picker = new jQuery.ColorPicker('#colorpicker', {
+                    imagepath: ''
+                });
                 picker.change(function(hex) {
                     $('h1').css('color', hex);
                 });
@@ -23,8 +24,10 @@
         <h1>jQuery colorpicker</h1>
         
         <div id="colorpicker">
-            replace
+            replaced content
         </div>
         
+        <p>Project hosted at <a href="http://github.com/rennat/jQuery-ColorPicker/">github</a>.</p>
+        <p><a href="http://github.com/rennat/jQuery-ColorPicker/">http://github.com/rennat/jQuery-ColorPicker/</a></p>
     </body>
 </html>
