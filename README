@@ -1,0 +1,48 @@
+h1. jQuery ColorPicker
+
+I needed a color picker and couldn't find one I liked so I made one.
+
+Please fork, update, then let me know :)
+
+h2. usage
+# load jQuery
+# load jQuery ColorPicker
+# instantiate jQuery ColorPicker
+
+h2. jQuery.ColorPicker
+
+bc. var myPicker = new jQuery.ColorPicker('#myDiv', {
+  imagepath: '../images/'
+});
+
+h3. constructor
+
+bc. jQuery.ColorPicker(container [, options])
+
+* @container@ : String
+  jQuery selector string for the element to be occupied by the ColorPicker.
+* @options@ : Object
+  Dictionary style object. See available options below.
+
+h4. options
+
+* @imagepath@ : String
+  The relative path from the page instantiating jQuery ColorPicker to the folder containing the included image files. Defaults to "" (same directory)
+* @change@ : Function
+  the given function will be called every time the ColorPicker updates. Keep in mind this may be many times a second while the user is dragging.
+
+h3. methods
+
+* @change()@
+  Calls the change function supplied in options.
+  ex. @myPicker.change();@
+* @hex()@
+  Returns current hexadecimal color.
+  ex. @var myHexColor = myPicker.hex();@
+* @hex(hexString)@
+  Sets ColorPicker to specified hexadecimal color.
+  ex. @myPicker.hex('#ffffff');@
+
+h2. compatibility
+* Tested only in Firefox 3.6, Chrome 4.0, and Safari 4.0.4 only since this is for an internal site.
+* Firefox is a bit buggy with dragging.
