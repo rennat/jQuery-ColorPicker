@@ -14,36 +14,44 @@
     <body>
         <h1>jQuery colorpicker</h1>
         
-        <h2 id="simpleHeader">Simple example</h2>
         <script type="text/javascript" charset="utf-8">
             $(document).ready(function(){
                 
                 // instantiate
                 picker = new jQuery.ColorPicker('#colorpicker', {
+                    color: '#3d668a',
                     imagepath: '',
                     change: function(hex) {
-                        $('#simpleHeader').css('color', hex);
+                        $('#preview').css('background', hex);
                         $('#hex_input').val(hex);
                     }
                 });
                 
                 // link text input back to picker
-                $('#hex_input').keyup(function(){
-                    var hex = $(this).val();
-                    picker.hex(hex);
+                $('#hex_input').keyup(function(e){
+                    if(e.which == 8
+                        || (48 <= e.which && e.which <= 57)
+                        || (97 <= e.which && e.which <= 102)) {
+                            var hex = $(this).val();
+                            picker.hex(hex);
+                        };
                 });
-                
-                // preset to a nice color
-                picker.hex('#3d668a');
             });
         </script>
-        <div id="colorpicker">
-            replaced content
+        <style type="text/css" media="screen">
+            #colorpicker_wrapper { float: left; margin: 2em; padding: 1ex; background: #808080;}
+            #preview { height: 24px; margin: 1ex; }
+            #form { margin: 1ex; color: #fff; }
+        </style>
+        <div id="colorpicker_wrapper">
+            <div id="preview"><!-- --></div>
+            <div id="colorpicker">
+                replaced content
+            </div>
+            <div id="form">
+                <label>Hexadecimal</label> <input type="text" id="hex_input" />
+            </div>
         </div>
-        
-        <fieldset>
-            <label>Hexadecimal</label> <input type="text" id="hex_input" /> 
-        </fieldset>
         
         <h2>Scroll wheel</h2>
         <p>Requires jquery.mousewheel.js (included). Degrades gracefully.</p>

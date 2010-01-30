@@ -229,7 +229,7 @@ jQuery.ColorPicker = function(container, options) {
             slider_hit.mousewheel(function(e, rawDelta){
                 if (rawDelta < 0) { delta = -1; }
                 else if (rawDelta > 0) { delta = 1; }
-                picker.color.val = Math.max(0, Math.min(1, picker.color.val + delta * 0.01));
+                picker.color.val = Math.max(0, Math.min(1, picker.color.val + delta * 0.0039));
                 picker.update_hex();
                 picker.update_val();
                 picker.update();
@@ -241,12 +241,12 @@ jQuery.ColorPicker = function(container, options) {
                 if (rawDelta < 0) { delta = -1; }
                 else if (rawDelta > 0) { delta = 1; }
                 if (!picker.io.shift) {
-                    var hue = picker.color.hue = picker.color.hue + delta;
+                    var hue = picker.color.hue = picker.color.hue + delta * 0.5;
                     while (hue < 0) {hue += 360;}
                     while (hue > 360) {hue -= 360;}
                     picker.color.hue = hue;
                 } else {
-                    picker.color.sat = Math.max(0, Math.min(1, picker.color.sat + delta * 0.01));
+                    picker.color.sat = Math.max(0, Math.min(1, picker.color.sat + delta * 0.008));
                 };
                 picker.update_hex();
                 picker.update_hue();
@@ -357,9 +357,11 @@ jQuery.ColorPicker = function(container, options) {
         var options = (arguments[1]) ? arguments[1] : {};
         
         picker.settings = jQuery.extend({
+            color: '#ffffff',
             imagepath: '',
             change: function(hex){}
         }, options);
+        
     
         picker.fn = {};
         picker.fn.change = picker.settings.change;
@@ -376,7 +378,7 @@ jQuery.ColorPicker = function(container, options) {
         picker.color.sat = 0;
         picker.color.val = 1;
         picker.color.hex = "ffffff";
-        picker.build().update();
+        picker.build().hex(picker.settings.color);
         return picker;
     };
     return picker.init(container, options);
