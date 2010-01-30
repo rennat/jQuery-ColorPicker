@@ -10,6 +10,11 @@
         </script>
         <script src="jquery.mousewheel.js" type="text/javascript" charset="utf-8"></script>
         <script src="jquery.colorpicker.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        <h1>jQuery colorpicker</h1>
+        
+        <h2 id="simpleHeader">Simple example</h2>
         <script type="text/javascript" charset="utf-8">
             $(document).ready(function(){
                 
@@ -17,7 +22,7 @@
                 picker = new jQuery.ColorPicker('#colorpicker', {
                     imagepath: '',
                     change: function(hex) {
-                        $('h1').css('color', hex);
+                        $('#simpleHeader').css('color', hex);
                         $('#hex_input').val(hex);
                     }
                 });
@@ -27,12 +32,11 @@
                     var hex = $(this).val();
                     picker.hex(hex);
                 });
+                
+                // preset to a nice color
+                picker.hex('#3d668a');
             });
         </script>
-    </head>
-    <body>
-        <h1>jQuery colorpicker</h1>
-        
         <div id="colorpicker">
             replaced content
         </div>
@@ -41,7 +45,7 @@
             <label>Hexadecimal</label> <input type="text" id="hex_input" /> 
         </fieldset>
         
-        <h3>scroll wheel</h3>
+        <h2>Scroll wheel</h2>
         <p>Requires jquery.mousewheel.js (included). Degrades gracefully.</p>
         <ul>
             <li>H - Use the scroll wheel over the wheel while holding shift to adjust the Hue.</li>
@@ -49,6 +53,7 @@
             <li>V - Use the scroll wheel over the slider to adjust the Value.</li>
         </ul>
         
+        <h2>Download / help out</h2>
         <p>Project hosted at <a href="http://github.com/rennat/jQuery-ColorPicker/">github</a>.</p>
         <p><a href="http://github.com/rennat/jQuery-ColorPicker/">http://github.com/rennat/jQuery-ColorPicker/</a></p>
     </body>

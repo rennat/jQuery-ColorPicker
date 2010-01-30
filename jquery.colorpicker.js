@@ -306,7 +306,7 @@ jQuery.ColorPicker = function(container, options) {
         picker.color.sat = hsv[1];
         picker.color.val = hsv[2];
         
-        picker.update_value();
+        picker.update_val();
         picker.update_hue();
         picker.update();
     };
