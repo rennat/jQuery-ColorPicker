@@ -205,11 +205,15 @@ jQuery.ColorPicker = function(container, options) {
             }).appendTo(slider_container);
         
         // events
+        wheel_cursor.click(function(){return false;});
+        wheel_cursor.mousedown(function(){return false;});
         wheel_hit.mousedown(function(){ picker.mouse.wheel = true; });
         wheel_hit.mouseup(function(){ picker.mouse.wheel = false; });
         wheel_hit.mouseout(function(){ picker.mouse.wheel = false; });
         wheel_hit.click(function(e){ picker.wheel_update(e); });
         
+        slider_cursor.click(function(){return false;});
+        slider_cursor.mousedown(function(){return false;});
         slider_hit.mousedown(function(){ picker.mouse.slider = true; });
         slider_hit.mouseup(function(){ picker.mouse.slider = false; });
         slider_hit.mouseout(function(){ picker.mouse.slider = false; });
@@ -219,6 +223,36 @@ jQuery.ColorPicker = function(container, options) {
             if (picker.mouse.wheel) { picker.wheel_update(e); } else
             if (picker.mouse.slider) { picker.slider_update(e); };
         });
+        
+        // if jQuery mousewheel is loaded add scrollwheel events
+        if (jQuery.fn.mousewheel){
+            slider_hit.mousewheel(function(e, rawDelta){
+                if (rawDelta < 0) { delta = -1; }
+                else if (rawDelta > 0) { delta = 1; }
+                picker.color.val = Math.max(0, Math.min(1, picker.color.val + delta * 0.01));
+                picker.update_hex();
+                picker.update_val();
+                picker.update();
+            }, true);
+            
+            jQuery(document).keydown(function(e) { if (e.which == 16) { picker.io.shift = true; }});
+            jQuery(document).keyup(function(e) { if (e.which == 16) { picker.io.shift = false; }});
+            wheel_hit.mousewheel(function(e, rawDelta){
+                if (rawDelta < 0) { delta = -1; }
+                else if (rawDelta > 0) { delta = 1; }
+                if (!picker.io.shift) {
+                    var hue = picker.color.hue = picker.color.hue + delta;
+                    while (hue < 0) {hue += 360;}
+                    while (hue > 360) {hue -= 360;}
+                    picker.color.hue = hue;
+                } else {
+                    picker.color.sat = Math.max(0, Math.min(1, picker.color.sat + delta * 0.01));
+                };
+                picker.update_hex();
+                picker.update_hue();
+                picker.update();
+            }, true);
+        };
         
         return picker;
     };
@@ -234,7 +268,7 @@ jQuery.ColorPicker = function(container, options) {
             if (hue < 0) { hue = picker.color.hue += 360; };
             picker.color.sat = d/128;
             
-            picker.color.hex = hsvToHex(hue, picker.color.sat, picker.color.val);
+            picker.update_hex();
             
             var fullVal = hsvToHex(hue, picker.color.sat, 1);
             picker.el.slider_bg.css('background', '#' + fullVal);
@@ -249,7 +283,7 @@ jQuery.ColorPicker = function(container, options) {
         var val = Math.round(100 - (pxOffset * 0.390625)) * 0.01;
         picker.el.slider_cursor.css('top', pxOffset - 8 + 'px');
         picker.color.val =  val;
-        picker.color.hex = hsvToHex(picker.color.hue, picker.color.sat, picker.color.val);
+        picker.update_hex();
         
         var fullVal = hsvToHex(picker.color.hue, picker.color.sat, 1);
         picker.el.slider_bg.css('background', '#' + fullVal);
@@ -272,14 +306,22 @@ jQuery.ColorPicker = function(container, options) {
         picker.color.sat = hsv[1];
         picker.color.val = hsv[2];
         
-        // update value
-        var fullVal = hsvToHex(picker.color.hue, picker.color.sat, 1);
-        picker.el.slider_bg.css('background', '#' + fullVal);
+        picker.update_value();
+        picker.update_hue();
+        picker.update();
+    };
+    
+    picker.update_hex = function() {
+        picker.color.hex = hsvToHex(picker.color.hue, picker.color.sat, picker.color.val);
+    };
+    
+    picker.update_val = function() {
         var top =  256 * (1 - picker.color.val) - 8;
         picker.el.slider_cursor.css('top', top + 'px');
         picker.el.wheel_mask.css('opacity', 1 - picker.color.val);
-        
-        // update hue / sat
+    };
+    
+    picker.update_hue = function() {
         var adeg = picker.color.hue + 90;
         if (adeg < 0) { adeg += 360; };
         var arad = adeg * Math.PI/180;
@@ -289,16 +331,16 @@ jQuery.ColorPicker = function(container, options) {
             'top': y2 - 8 + 'px',
             'left': x2 - 8 + 'px'
         });
-        picker.update();
+        var fullVal = hsvToHex(picker.color.hue, picker.color.sat, 1);
+        picker.el.slider_bg.css('background', '#' + fullVal);
     };
-    
-    picker.change = function() {
-        return picker.update();
-    };
+    picker.update_sat = picker.update_hue;
     
     picker.update = function() {
+        picker.update_hex();
         picker.fn.change('#' + picker.color.hex);
     };
+    picker.change = picker.update;
     
     picker.hex = function(hex) {
         var strPattern = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i; 
@@ -323,9 +365,8 @@ jQuery.ColorPicker = function(container, options) {
         picker.fn.change = picker.settings.change;
         picker.el = {};
         picker.el.container = jQuery(container);
-        picker.mouse = {};
-        picker.mouse.wheel = false;
-        picker.mouse.slider = false;
+        picker.io = {shift: false};
+        picker.mouse = {wheel: false, slider: false};
         picker.math = {};
         picker.math.angle = 0;
         picker.math.center = {x: 128, y: 128};

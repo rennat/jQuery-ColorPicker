@@ -8,6 +8,7 @@
         <script type="text/javascript" charset="utf-8">
             google.load("jquery", "1.4.1");
         </script>
+        <script src="jquery.mousewheel.js" type="text/javascript" charset="utf-8"></script>
         <script src="jquery.colorpicker.js" type="text/javascript" charset="utf-8"></script>
         <script type="text/javascript" charset="utf-8">
             $(document).ready(function(){
@@ -39,6 +40,14 @@
         <fieldset>
             <label>Hexadecimal</label> <input type="text" id="hex_input" /> 
         </fieldset>
+        
+        <h3>scroll wheel</h3>
+        <p>Requires jquery.mousewheel.js (included). Degrades gracefully.</p>
+        <ul>
+            <li>H - Use the scroll wheel over the wheel while holding shift to adjust the Hue.</li>
+            <li>S - Use the scroll wheel over the wheel to adjust the Saturation.</li>
+            <li>V - Use the scroll wheel over the slider to adjust the Value.</li>
+        </ul>
         
         <p>Project hosted at <a href="http://github.com/rennat/jQuery-ColorPicker/">github</a>.</p>
         <p><a href="http://github.com/rennat/jQuery-ColorPicker/">http://github.com/rennat/jQuery-ColorPicker/</a></p>
