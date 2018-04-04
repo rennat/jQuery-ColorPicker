@@ -1,3 +1,13 @@
+/*
+ * ----------------------------------------------------------------------------
+ * "THE BEER-WARE LICENSE" (Revision 42):
+ * <tannern@gmail.com> wrote this file.  As long as you retain this notice you
+ * can do whatever you want with this stuff. If we meet some day, and you think
+ * this stuff is worth it, you can buy me a beer in return.  Tanner Netterville
+ * ----------------------------------------------------------------------------
+ */
+
+
 function rgbToHsv(r, g, b){
     r = r/255, g = g/255, b = b/255;
     var max = Math.max(r, g, b), min = Math.min(r, g, b);
